@@ -1,0 +1,17 @@
+# Simple Vagrant example
+
+Vagrant.configure("2") do |config|
+    # 2 stands for the version of the configuration object, 2 is for Vagrant 1.1+ up to 2.0.x.
+
+    config.vm.boot_timeout = 280 # default: 300
+    config.vm.define "coderefinery-basic" do |basic| # define virtual machine's name, beneficial especially if you have multiple instances, defaults to 'default'
+      basic.vm.box = "centos/7" # can be a url too
+    end
+    config.vm.box_check_update = true # check for updates on every time you start the machine
+    config.vm.hostname = "coderefinery-basic" # set up hostname
+    config.vm.network :forwarded_port, guest: 80, host: 8888, auto_correct: true # forward virtual machine's http port to host's port 8888
+    config.vm.provision "shell", path: "setup.sh" # run this simple setup script, you can add inline commands to this file as well
+    config.vm.synced_folder "./www", "/var/www/html", type: "rsync", create: false, group: "apache", owner: "apache" # This will require Guest Additions to be installed without type "rsync". 
+end
+
+
