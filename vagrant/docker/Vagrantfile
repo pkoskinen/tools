@@ -1,0 +1,27 @@
+# Vagrant example combining Docker. Installs Jupyter notebook on host machine
+
+$script = <<END
+yum install -y docker
+systemctl start docker.service
+systemctl enable docker.service
+docker run -d -p 8888:8888 jupyter/minimal-notebook
+END
+
+
+Vagrant.configure("2") do |config|
+    # 2 stands for the version of the configuration object, 2 is for Vagrant 1.1+ up to 2.0.x.
+
+    config.vm.boot_timeout = 280 # default: 300
+    config.vm.define "coderefinery-docker" do |docker| # define virtual machine's name, beneficial especially if you have multiple instances, defaults to 'default'
+      docker.vm.box = "centos/7" # can be a url too
+    end
+    #config.vm.box_check_update = true # check for updates on every time you start the machine
+    config.vm.hostname = "coderefinery-docker" # set up hostname
+    config.vm.network :forwarded_port, guest: 8888, host: 8080, auto_correct: true # forward virtual machine's port 8888 to host's port 8080
+    config.vm.network "private_network", ip: "192.168.1.12"
+    
+    config.vm.provision "shell",
+      inline: $script # example of using inline script, the script installs docker and runs a Docker container
+end
+
+
